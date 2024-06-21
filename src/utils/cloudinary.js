@@ -1,4 +1,4 @@
-import {V2 as cloudinary} from "cloudinary"
+import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
 
 
@@ -8,20 +8,23 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadOnRoy = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null
-        await cloudinary.uploader.upload(localFilePath, {
+        // upload file on cloudinary
+        const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
         })
-        fs.unlinkSync(localFilePath)
+        // file has been uploaded succesfully
+        console.log("file is uploaded", response.url);
         return response;
         
     } catch (error) {
+        // unlink is use for remove the locally saved temp file upload got failed, or just reamove the file link
         fs.unlinkSync(localFilePath)
         return null;
         
     }
 }
 
-export { uploadOnRoy }
+export { uploadOnCloudinary }

@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import  jwt  from "jsonwebtoken"
 import mongoose from "mongoose"
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
 const generateAccessAndRefereshTokens = async (userId) => {
     try {
@@ -28,6 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All fields are required")
     }
+    console.log(["email:", email], ["username:", username] );
     // validation - not empty
 
     const existedUser = await User.findOne({
@@ -46,7 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // check for images, check for avatar
 
     if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required")
+        return new ApiError(400, "Avatar file is required")
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
