@@ -37,7 +37,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         const total = await Video.countDocuments(filter);
 
         // Return response
-        res.status(200).json({
+        return res.status(200).json(new ApiResponse(200),{
             success: true,
             data: videos,
             pagination: {
@@ -48,11 +48,12 @@ const getAllVideos = asyncHandler(async (req, res) => {
             },
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch videos',
-            error: error.message,
-        });
+        res.status(500).json(new ApiError(500),
+            {
+                success: false,
+                message: 'Failed to fetch videos',
+                error: error.message,
+            });
     }
 });
 
@@ -91,13 +92,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
         });
 
         // Respond with the created video
-        res.status(201).json({
+        return res.status(201).json(new ApiResponse(200),{
             success: true,
             message: 'Video published successfully',
             data: newVideo,
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json(new ApiError(500),{
             success: false,
             message: 'Failed to publish video',
             error: error.message,
@@ -116,13 +117,12 @@ const getVideoById = asyncHandler(async (req, res) => {
                 message: 'Video not found',
             });
         }
-
-        res.status(200).json({
+        return res.status(200).json(new ApiResponse(200),{
             success: true,
             data: video,
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json(new ApiError(500),{
             success: false,
             message: 'Failed to fetch video',
             error: error.message,
@@ -134,36 +134,30 @@ const getVideoById = asyncHandler(async (req, res) => {
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { title, description, thumbnail } = req.body;
-
     try {
         const updatedVideo = await Video.findByIdAndUpdate(
             videoId,
             { title, description, thumbnail },
             { new: true, runValidators: true }
         );
-
-
         if (!updatedVideo) {
             return res.status(404).json({
                 success: false,
                 message: 'Video not found',
             });
         }
-
-        res.status(200).json({
+        return res.status(200).json(new ApiResponse(200),{
             success: true,
             message: 'Video updated successfully',
             data: updatedVideo,
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json(new ApiError(500),{
             success: false,
             message: 'Failed to update video',
             error: error.message,
         });
     }
-
-
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
@@ -181,12 +175,12 @@ const deleteVideo = asyncHandler(async (req, res) => {
         // If you're using Cloudinary and need to delete the video there:
         await cloudinary.uploader.destroy(deletedVideo.publicId, { resource_type: 'video' });
 
-        res.status(200).json({
+        return res.status(200).json(new ApiResponse(200),{
             success: true,
             message: 'Video deleted successfully',
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json(new ApiError(500),{
             success: false,
             message: 'Failed to delete video',
             error: error.message,
@@ -211,13 +205,13 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         video.isPublished = !video.isPublished;
         await video.save();
 
-        res.status(200).json({
+        return res.status(200).json(new ApiResponse(200),{
             success: true,
             message: `Video publish status updated to ${video.isPublished}`,
             data: video,
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json(new ApiError(500),{
             success: false,
             message: 'Failed to toggle publish status',
             error: error.message,
