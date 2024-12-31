@@ -1,4 +1,10 @@
 import mongoose from "mongoose";
+import { Channel } from "../models/channel.model.js";
+import { Like } from "../models/like.model.js";
+import { Subscription } from "../models/subscription.model.js";
+import { Video } from "../models/video.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js"
 
 
@@ -6,10 +12,9 @@ const getChannelStats = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
 
     // Find the channel by ID (optional, you can remove this check if not needed)
-    const channel = await channel.findById(channelId);
+    const channel = await Channel.findById(channelId);
     if (!channel) {
-        res.status(404);
-        throw new ('Channel not found');
+        throw new ApiError('Channel not found');
     }
 
     // Total number of videos
@@ -17,7 +22,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
 
     // Total views across all videos in the channel
     const totalViews = await Video.aggregate([
-        { $match: { channelId } },
+        { $match: { channelId: mongoose.Types.ObjectId(channelId) } },
         { $group: { _id: null, totalViews: { $sum: '$views' } } },
     ]);
 
@@ -27,7 +32,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
     // Total likes across all videos in the channel
     const totalLikes = await Like.countDocuments({ channelId });
 
-    res.status(200).json({
+    res.status(200).json(new ApiResponse(200), {
         success: true,
         data: {
             totalVideos,
@@ -39,8 +44,24 @@ const getChannelStats = asyncHandler(async (req, res) => {
 
 })
 
-const getChannelVideos = asyncHandler(async (rreq, res) => {
+const getChannelVideos = asyncHandler(async (req, res) => {
+    const { channelId } = req.params;
 
+    // Find the channel by ID
+    const channel = await Channel.findById(channelId);
+    if (!channel) {
+        throw new ApiError("Channel not found", 404);
+    }
+
+    // Retrieve videos for the channel
+    const videos = await Video.find({ channelId });
+
+    res.status(200).json(
+        new ApiResponse(200, {
+            success: true,
+            data: videos,
+        })
+    );
 })
 
 export {
