@@ -1,19 +1,18 @@
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import asyncHandler from ('express-async-handler');
-import Video from ('../models/videoModel');
-import Subscription from ('../models/subscriptionModel');
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js"
+import Video from '../models/videoModel.js';
+import Subscription from '../models/subscriptionModel.js';
 import Like from ('../models/likeModel');
-import Channel from ('../models/channelModel');
+import Channel from '../models/channelModel.js';
 
 // Get channel statistics: total videos, views, likes, subscribers
-const getChannelStats = asyncHandler(async (req, res) => {
+export default getChannelStats = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
 
     // Find the channel by ID
     const channel = await Channel.findById(channelId);
     if (!channel) {
-        res.status(404);
         throw new ApiError('Channel not found');
     }
 
@@ -52,4 +51,3 @@ const getChannelStats = asyncHandler(async (req, res) => {
                 ));
 });
 
-module.exports = { getChannelStats };
