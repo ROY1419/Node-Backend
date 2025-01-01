@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
+import { ApiError } from "../utils/ApiError";
+import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
+
 
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -15,17 +18,18 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     // Get total number of comments for the video
     const totalComments = await Comment.countDocuments({ videoId });
-
-    res.status(200).json({
-        success: true,
-        data: comments,
-        pagination: {
-            total: totalComments,
-            page: pageNumber,
-            limit: limitNumber,
-            totalPages: Math.ceil(totalComments / limitNumber)
-        }
-    });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {
+            success: true,
+            data: comments,
+            pagination: {
+                total: totalComments,
+                page: pageNumber,
+                limit: limitNumber,
+                totalPages: Math.ceil(totalComments / limitNumber)
+            }
+        }))
 })
 
 const addComment = asyncHandler(async (req, res) => {
@@ -35,15 +39,13 @@ const addComment = asyncHandler(async (req, res) => {
 
     // Ensure the comment text is provided
     if (!text) {
-        res.status(400);
-        throw new Error('Comment text is required');
+        throw new ApiError('Comment text is required');
     }
 
     // Check if the video exists (optional, depends on your structure)
     const video = await video.findById(videoId);
     if (!video) {
-        res.status(404);
-        throw new Error('Video not found');
+        throw new ApiError('Video not found');
     }
 
     // Create a new comment
@@ -53,11 +55,12 @@ const addComment = asyncHandler(async (req, res) => {
         text,
         createdAt: Date.now(),
     });
-
-    res.status(201).json({
-        success: true,
-        data: comment,
-    });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {
+            success: true,
+            data: comment,
+        }))
 })
 const updateComment = asyncHandler(async (req, res) => {
     const { commentId } = req.params;
@@ -66,7 +69,6 @@ const updateComment = asyncHandler(async (req, res) => {
 
     // Ensure new comment text is provided
     if (!text) {
-        res.status(400);
         throw new Error('Updated comment text is required');
     }
 
@@ -74,13 +76,11 @@ const updateComment = asyncHandler(async (req, res) => {
     const comment = await Comment.findById(commentId);
 
     if (!comment) {
-        res.status(404);
         throw new Error('Comment not found');
     }
 
     // Check if the authenticated user is the owner of the comment
     if (comment.userId.toString() !== userId.toString()) {
-        res.status(403);
         throw new Error('User not authorized to update this comment');
     }
 
@@ -89,11 +89,12 @@ const updateComment = asyncHandler(async (req, res) => {
 
     // Save the updated comment
     const updatedComment = await comment.save();
-
-    res.status(200).json({
-        success: true,
-        data: updatedComment,
-    });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {
+            success: true,
+            data: updatedComment,
+        }))
 })
 const deleteComment = asyncHandler(async (req, res) => {
     const { commentId } = req.params;
@@ -103,23 +104,22 @@ const deleteComment = asyncHandler(async (req, res) => {
     const comment = await Comment.findById(commentId);
 
     if (!comment) {
-        res.status(404);
         throw new Error('Comment not found');
     }
 
     // Check if the authenticated user is the owner of the comment
-    if (comment.userId.toString() !== userId.toString()) {
-        res.status(403);
+    if (comment.userId.toString() !== userId.toString()){
         throw new Error('User not authorized to delete this comment');
     }
 
     // Remove the comment from the database
     await comment.remove();
-
-    res.status(200).json({
-        success: true,
-        message: 'Comment successfully deleted',
-    });
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {
+            success: true,
+            message: 'Comment successfully deleted',
+        }))
 })
 
 export {
