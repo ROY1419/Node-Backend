@@ -1,18 +1,21 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { asyncHandler } from "../utils/asyncHandler";
-import { Tweet } from "../models/tweet.model";
-import { User } from "../models/user.model";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { Tweet } from "../models/tweet.model.js";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { Channel } from "../models/channel.model.js";
+import { Video } from "../models/video.model.js";
+import { Subscription } from "../models/subscription.model.js";
+import { Like } from "../models/like.model.js";
 
 const createTweet = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
 
     // Find the channel by ID (optional, you can remove this check if not needed)
-    const channel = await channel.findById(channelId);
+    const channel = await Channel.findById(channelId);
     if (!channel) {
-        res.status(404);
-        throw new Error('Channel not found');
+        throw new ApiError('Channel not found');
     }
 
     // Total number of videos
@@ -31,7 +34,7 @@ const createTweet = asyncHandler(async (req, res) => {
     const totalLikes = await Like.countDocuments({ channelId });
 
     return res
-        .status(200).json({
+        .status(200).json(new ApiResponse(200),{ 
             success: true,
             data: {
                 totalVideos,
