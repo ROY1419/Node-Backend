@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { User } from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
-import  jwt  from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All fields are required")
     }
-    console.log(["email:", email], ["username:", username] );
+    console.log(["email:", email], ["username:", username]);
     // validation - not empty
 
     const existedUser = await User.findOne({
@@ -95,7 +95,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
     // username or email
 
-    const user = await User.findByOne({
+    const user = await User.findOne({
         $or: [{ username }, { email }]
     })
     if (!user) {
@@ -299,14 +299,6 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         {
             $match: {
                 username: username?.toLowerCase()
-            }
-        },
-        {
-            $lookup: {
-                from: "subscriptions",
-                localField: "id",
-                foreignField: "channel",
-                as: "subscribers"
             }
         },
         {
