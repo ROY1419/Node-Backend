@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Video } from "../models/video.model";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -17,7 +18,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 }); // Sort by newest comments first
 
     // Get total number of comments for the video
-    const totalComments = await Comment.countDocuments({ videoId });
+    const totalComments = await comments.countDocuments({ videoId });
     return res
         .status(200)
         .json(new ApiResponse(200, {
@@ -37,18 +38,18 @@ const addComment = asyncHandler(async (req, res) => {
     const { text } = req.body;
     const userId = req.user._id; // Assuming user information is available from authentication middleware
 
-    // Ensure the comment text is provided
+    // Ensure the comments text is provided
     if (!text) {
         throw new ApiError('Comment text is required');
     }
 
     // Check if the video exists (optional, depends on your structure)
-    const video = await video.findById(videoId);
+    const video = await Video.findById(videoId);
     if (!video) {
         throw new ApiError('Video not found');
     }
 
-    // Create a new comment
+    // Create a new comments
     const comment = await Comment.create({
         videoId,
         userId,
@@ -73,22 +74,22 @@ const updateComment = asyncHandler(async (req, res) => {
     }
 
     // Find the comment by its ID
-    const comment = await Comment.findById(commentId);
+    const comments = await Comment.findById(commentId);
 
-    if (!comment) {
+    if (!comments) {
         throw new Error('Comment not found');
     }
 
     // Check if the authenticated user is the owner of the comment
-    if (comment.userId.toString() !== userId.toString()) {
+    if (comments.userId.toString() !== userId.toString()) {
         throw new Error('User not authorized to update this comment');
     }
 
     // Update the comment text
-    comment.text = text;
+    comments.text = text;
 
     // Save the updated comment
-    const updatedComment = await comment.save();
+    const updatedComment = await comments.save();
     return res
         .status(200)
         .json(new ApiResponse(200, {
@@ -101,19 +102,19 @@ const deleteComment = asyncHandler(async (req, res) => {
     const userId = req.user._id; // Assuming user is authenticated and available in req.user
 
     // Find the comment by its ID
-    const comment = await Comment.findById(commentId);
+    const comments = await Comment.findById(commentId);
 
-    if (!comment) {
+    if (!comments) {
         throw new Error('Comment not found');
     }
 
-    // Check if the authenticated user is the owner of the comment
-    if (comment.userId.toString() !== userId.toString()){
-        throw new Error('User not authorized to delete this comment');
+    // Check if the authenticated user is the owner of the comments
+    if (comments.userId.toString() !== userId.toString()){
+        throw new Error('User not authorized to delete this comments');
     }
 
-    // Remove the comment from the database
-    await comment.remove();
+    // Remove the comments from the database
+    await comments.remove();
     return res
         .status(200)
         .json(new ApiResponse(200, {
