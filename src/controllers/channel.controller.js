@@ -14,6 +14,7 @@ export default getChannelStats = asyncHandler(async (req, res) => {
     const channel = await Channel.findById(channelId);
     if (!channel) {
         throw new ApiError('Channel not found');
+
     }
 
     // Total number of videos for the channel
