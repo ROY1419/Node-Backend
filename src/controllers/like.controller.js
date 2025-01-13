@@ -3,6 +3,7 @@ import { Tweet } from "../models/tweet.model";
 import { Comment } from "../models/comment.model";
 import { Video } from "../models/video.model";
 import { asyncHandler } from "../utils/asyncHandler";
+import { Like } from "../models/like.model";
 
 const toggleVideoLike = asyncHandler(async(req, res) => {
     const { videoId } = req.params;
