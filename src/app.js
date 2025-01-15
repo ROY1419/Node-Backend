@@ -20,7 +20,7 @@ import tweetRouter from "./routes/tweet.routes.js"
 
 // routes declaration
 // app.get is for get the detals about data and app.use for methods because we erler declaed the route that why we use .use not .get
-app.use("/users", userRouter)
+app.use("/", userRouter)
 app.use("/tweet", tweetRouter )
 
 
